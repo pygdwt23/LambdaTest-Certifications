@@ -39,7 +39,7 @@ class BaseTest(unittest.TestCase):
 		            "video": True,
 		            "platformName": "Windows 10",
 		            "build": "Selenium101Assignment",
-		            "project": "UntitledSelenium101Assignment",
+		            "project": "Selenium101Assignment",
 		            "name": "Selenium101Assignment"
 	            }
             }
@@ -55,7 +55,7 @@ class BaseTest(unittest.TestCase):
 class Scenario001(BaseTest):
     def test_001(self):
         print("=============================================================================================================================")
-        print("02. SCENARIO 001 IS RUNNING")
+        print("01. SCENARIO 001 IS RUNNING")
     # Step 1 - Click “Simple Form Demo” under Input Forms.
         WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.XPATH, "//a[.='Simple Form Demo']"))).click()
 
@@ -85,9 +85,12 @@ class Scenario001(BaseTest):
         self.driver.get_screenshot_as_file("scenario001.png")
         print("scenario001.png is captured succesfully")
         time.sleep(5)
-        print("RESULT: SCENARIO_001 IS PASS")
-
-
+        if self.driver.find_element(By.XPATH, "//p[@id='message']").is_displayed:
+            self.driver.execute_script("lambda-status=passed")
+            print("lambda-status=passed")
+        else:
+            self.driver.execute_script("lambda-status=failed")
+            print("lambda-status=failed")
 
 class Scenario002(BaseTest):
     def test_002(self):
@@ -107,7 +110,65 @@ class Scenario002(BaseTest):
         self.driver.get_screenshot_as_file("scenario002.png")
         print("scenario002.png is captured succesfully")
         print("EXPECTED: %s" %expectedRange, "ACTUAL: %s" %rangeSuccess)
-        print("RESULT: SCENARIO_002 IS PASS")
+        if self.driver.find_element(By.XPATH,"//output[@id='rangeSuccess']").is_displayed:
+            self.driver.execute_script("lambda-status=passed")
+            print("lambda-status=passed")
+        else:
+            self.driver.execute_script("lambda-status=failed")
+            print("lambda-status=failed")
+
+class Scenario003(BaseTest):
+    def test_003(self):
+        print("=============================================================================================================================")
+        print("03. SCENARIO 003 IS RUNNING")
+    # Step 1 - Open the https://www.lambdatest.com/selenium-playground page and click “Input Form Submit” under “Input Forms”.
+        WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.XPATH, "//a[.='Input Form Submit']"))).click()
+
+    # Step 2 - Click “Submit” without filling in any information in the form.
+        WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Submit']"))).click()
+
+    # Step 3 - Assert “Please fill in the fields” error message.
+        errorMsg = self.driver.find_element(By.XPATH, "//input[@id='name']").get_attribute(name="validationMessage")
+        expectedErrorMsg = "Please fill out this field."
+        self.assertEqual(errorMsg, expectedErrorMsg)
+        print(errorMsg)
+        self.driver.get_screenshot_as_file("scenario003_a.png")
+        time.sleep(5)
+
+    # Step 4 - Fill in Name, Email, and other fields.
+        WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.XPATH, "//input[@id='name']"))).send_keys(fake.name())
+        WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[placeholder='Email']"))).send_keys(fake.ascii_safe_email())
+        WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.XPATH, "//input[@name='password']"))).send_keys("LambdaTest@2023")
+        WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.XPATH, "//input[@id='company']"))).send_keys(fake.company())
+        WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.XPATH, "//input[@id='websitename']"))).send_keys(fake.url())
+
+    # Step 5 - From the Country drop-down, select “United States” using the text property.
+        countrySelect = Select(self.driver.find_element(By.XPATH, "//select[@name='country']"))
+        countrySelect.select_by_value("US")
+        self.driver.get_screenshot_as_file("scenario003_b.png")
+
+        WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.XPATH, "//input[@id='inputCity']"))).send_keys(fake.city())
+        WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[placeholder='Address 1']"))).send_keys(fake.address())
+        WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.CSS_SELECTOR, "[placeholder='Address 2']"))).send_keys(fake.address())
+        WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.XPATH, "//input[@id='inputZip']"))).send_keys(fake.postcode())
+        self.driver.get_screenshot_as_file("scenario003_c.png")
+        time.sleep(5)
+    # Step 6 - Fill all fields and click “Submit”.
+        WebDriverWait(self.driver, 60).until(EC.element_to_be_clickable((By.XPATH, "//button[normalize-space()='Submit']"))).click()
+
+    # Step 7 - Once submitted, validate the success message “Thanks for contacting us, we will get back to you shortly.” on the screen.
+        time.sleep(5)
+        self.driver.get_screenshot_as_file("scenario003_d.png")
+        if WebDriverWait(self.driver, 60).until(EC.visibility_of_element_located((By.XPATH, "//p[@class='success-msg hidden']"))).is_displayed():
+            successMsg = self.driver.find_element(By.XPATH, "//p[@class='success-msg hidden']").text
+            print(successMsg)
+            expectedSuccessMsg = "Thanks for contacting us, we will get back to you shortly."
+            self.assertEqual(expectedSuccessMsg, successMsg)
+            self.driver.execute_script("lambda-status=passed")
+            print("lambda-status=passed")
+        else:
+            self.driver.execute_script("lambda-status=failed")
+            print("lambda-status=failed")
 
 
 if __name__ == '__main__':
